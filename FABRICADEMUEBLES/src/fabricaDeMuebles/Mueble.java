@@ -6,6 +6,7 @@ public class Mueble {
 	private String material;
 	private String ID;
 	private int fecha;
+	private int cont=0;
 	
 	public Mueble(Material material, Tipo tipo){
 		setID();
@@ -18,7 +19,7 @@ public class Mueble {
 	}
 	
 	private void setID(String ID) {
-		this.ID = ID;
+		this.ID = ID+(cont++);
 	}
 
 	protected int getCantMadera() {
@@ -35,13 +36,13 @@ public class Mueble {
 
 	protected void setID() {
 		if(getClass().getSimpleName().equals("Silla")){
-			this.ID = "SI";
+			this.ID = "SI"+(cont++);
 		}
 		else if(getClass().getSimpleName().equals("Mesa")){
-			this.ID = "ME";
+			this.ID = "ME"+(cont++);
 		}
 		else{
-			this.ID = "AR";
+			this.ID = "AR"+(cont++);
 		}
 	}
 

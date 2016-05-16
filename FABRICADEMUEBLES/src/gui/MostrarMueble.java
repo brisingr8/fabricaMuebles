@@ -52,21 +52,21 @@ public class MostrarMueble extends Base {
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					if(textFieldID.getText().equals("SI")){
-						Silla silla = (Silla) Gestionar.getTienda().get(textFieldID.getText());
-						textFieldTipo.setText(String.valueOf(silla.getTipo()));
-						textFieldMaterial.setText(String.valueOf(silla.getMaterial()));
-					}
-					else if(textFieldID.getText().equals("ME")){
-						Mesa mesa = (Mesa) Gestionar.getTienda().get(textFieldID.getText());
-						textFieldTipo.setText(String.valueOf(mesa.getTipo()));
-						textFieldMaterial.setText(String.valueOf(mesa.getMaterial()));
-					}
-					else if(textFieldID.getText().equals("ME")){
-						Armario armario = (Armario) Gestionar.getTienda().get(textFieldID.getText());
-						textFieldTipo.setText(String.valueOf(armario.getTipo()));
-						textFieldMaterial.setText(String.valueOf(armario.getMaterial()));
-					}					
+//					if(textFieldID.getText().equals("SI")){
+						Mueble mueble = Gestionar.getTienda().get(textFieldID.getText());
+						textFieldTipo.setText(String.valueOf(mueble.getTipo()));
+						textFieldMaterial.setText(String.valueOf(mueble.getMaterial()));
+//					}
+//					else if(textFieldID.getText().equals("ME")){
+//						Mesa mesa = (Mesa) Gestionar.getTienda().get(textFieldID.getText());
+//						textFieldTipo.setText(String.valueOf(mesa.getTipo()));
+//						textFieldMaterial.setText(String.valueOf(mesa.getMaterial()));
+//					}
+//					else if(textFieldID.getText().equals("ME")){
+//						Armario armario = (Armario) Gestionar.getTienda().get(textFieldID.getText());
+//						textFieldTipo.setText(String.valueOf(armario.getTipo()));
+//						textFieldMaterial.setText(String.valueOf(armario.getMaterial()));
+//					}					
 				} catch (Exception e1) {
 					JOptionPane.showMessageDialog(contentPanel, "Error. " + e1.getMessage(), "Error",
 							JOptionPane.ERROR_MESSAGE);

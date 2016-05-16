@@ -8,15 +8,21 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
+import fabricaDeMuebles.Fichero;
 import fabricaDeMuebles.Gestionar;
+import fabricaDeMuebles.Tienda;
 
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.IOException;
 import java.awt.event.InputEvent;
 import javax.swing.JSeparator;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 
 /**
@@ -29,9 +35,9 @@ import javax.swing.JLabel;
 public class Principal {
 
 	JFrame frame;
-
-//	private JFileChooser fileChooser = new JFileChooser();
-//	private FileNameExtensionFilter filtro = new FileNameExtensionFilter("*.obj", "obj");
+	
+	private JFileChooser fileChooser = new JFileChooser();
+	private FileNameExtensionFilter filtro = new FileNameExtensionFilter("*.obj", "obj");
 
 	/**
 	 * 
@@ -68,7 +74,7 @@ public class Principal {
 		frame.setBounds(100, 100, 450, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
-//		fileChooser.setFileFilter(filtro);
+		fileChooser.setFileFilter(filtro);
 
 		AltaMueble alta = new AltaMueble();
 		MostrarMueble mostrar = new MostrarMueble();
@@ -90,7 +96,11 @@ public class Principal {
 		JMenuItem mntmNuevaTienda = new JMenuItem("Nueva tienda");
 		mntmNuevaTienda.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				
+				comprobarCambios();
+				Gestionar.setTienda(new Tienda());
+				Gestionar.setFile(new File("Sin título"));
+				Gestionar.setModificado(false);
+				frame.setTitle(Gestionar.getFile().getPath());
 			}
 		});
 		mntmNuevaTienda
@@ -100,6 +110,7 @@ public class Principal {
 		JMenuItem mntmAbrirTienda = new JMenuItem("Abrir tienda...");
 		mntmAbrirTienda.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				abrir();
 			}
 		});
 		mnArchivo.add(mntmAbrirTienda);
@@ -110,6 +121,7 @@ public class Principal {
 		JMenuItem mntmGuardar = new JMenuItem("Guardar");
 		mntmGuardar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				guardar();
 			}
 		});
 		mntmGuardar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));
@@ -118,6 +130,7 @@ public class Principal {
 		JMenuItem mntmGuardarComo = new JMenuItem("Guardar como...");
 		mntmGuardarComo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				guardarComo();
 			}
 		});
 		mnArchivo.add(mntmGuardarComo);
@@ -192,7 +205,7 @@ public class Principal {
 							"Tienda vacía", JOptionPane.INFORMATION_MESSAGE);
 				} else {
 					mostrarTienda.refrescar(Gestionar.getTienda().get(0));
-					// mostrarConcesionario.refrescarBotones();
+					// mostrarTienda.refrescarBotones();
 					mostrarTienda.setVisible(true);
 				}
 			}
@@ -254,5 +267,80 @@ public class Principal {
 		lblNewLabel.setIcon(new ImageIcon(Principal.class.getResource("/imagenes/principal.jpg")));
 		lblNewLabel.setBounds(10, 32, 424, 228);
 		frame.getContentPane().add(lblNewLabel);
+	}
+	
+	private void comprobarCambios() {
+		if (Gestionar.modificado()) {
+			switch (JOptionPane.showOptionDialog(frame.getContentPane(), "Tienda modificada. ¿Guardar cambios?",
+					"Confirmar", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null)) {
+			case JOptionPane.YES_OPTION:
+				guardar();
+				break;
+			case JOptionPane.NO_OPTION:
+				break;
+			}
+		}
+	}
+	
+	private void abrir() {
+		comprobarCambios();
+		int seleccion = fileChooser.showOpenDialog(frame);
+		if (seleccion == JFileChooser.APPROVE_OPTION) {
+			try {
+				File file = fileChooser.getSelectedFile();
+				Gestionar.setTienda(Fichero.abrir(file));
+				Gestionar.setFile(file);
+				frame.setTitle(Gestionar.getFile().getPath());
+			} catch (ClassNotFoundException e) {
+				JOptionPane.showMessageDialog(frame.getContentPane(), "Fichero no contiene tiendas.", "Error",
+						JOptionPane.ERROR_MESSAGE);
+			} catch (IOException e) {
+				JOptionPane.showMessageDialog(frame.getContentPane(), "No se puede abrir el fichero.", "Error",
+						JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
+
+	private void guardarComo() {
+		if (fileChooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION) {
+			try {
+				File file = fileChooser.getSelectedFile();
+				if (Fichero.existe(file)) {
+					switch (JOptionPane.showOptionDialog(frame.getContentPane(),
+							"El fichero ya existe. ¿Desea sobreescribirlo?", "Confirmar", JOptionPane.YES_NO_OPTION,
+							JOptionPane.QUESTION_MESSAGE, null, null, null)) {
+					case JOptionPane.NO_OPTION:
+						return;
+					case JOptionPane.YES_OPTION:
+						rutina(file);
+						return;
+					}
+				}
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(frame.getContentPane(), "El sistema no puede guardar el fichero.",
+						"Error.", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
+
+	private void guardar() {
+		if (Gestionar.getFile().getName().equals("Sin título")) {
+			guardarComo();
+		} else {
+			try {
+				File file = fileChooser.getSelectedFile();
+				rutina(file);
+			} catch (Exception e) {
+				JOptionPane.showMessageDialog(frame.getContentPane(), "El sistema no puede guardar el fichero.",
+						"Error.", JOptionPane.ERROR_MESSAGE);
+			}
+		}
+	}
+
+	private void rutina(File file) throws IOException {
+		Fichero.guardar(file, Gestionar.getTienda());
+		Gestionar.setModificado(false);
+		Gestionar.setFile(file);
+		frame.setTitle(Gestionar.getFile().getPath());
 	}
 }
